@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const List = styled.ul`
+export const ListByContact = styled.ul`
   width: 600px;
   margin: 0 auto; /* Центрировать список по горизонтали */
   list-style-type: none;

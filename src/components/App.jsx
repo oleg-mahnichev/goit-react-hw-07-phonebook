@@ -1,68 +1,50 @@
 import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { addContact, deleteContact } from '../redux/contactsSlice';
-import { setFilter } from '../redux/filterSlice';
-import ContactForm from './ContactForm/ContactForm';
-import ContactList from './ContactList/ContactList';
-import Filter from './Filter/Filter';
-import { HeaderTitle, ContactsTitle } from './Header.style';
-import { persistor } from '../redux/store';
-import { PersistGate } from 'redux-persist/integration/react';
+import { useSelector } from 'react-redux';
 
-export function App() {
-  const contacts = useSelector(state => state.contacts);
-  const filter = useSelector(state => state.filter);
+import { ContactForm, submit } from './ContactForm/ContactForm';
+import { Filter } from './Filter/Filter';
+import { ContactList } from './ContactList/ContactList';
+import { StyledDiv, ContactsTitle, HeaderTitle } from './Header.style';
+import { useDispatch } from 'react-redux';
+import { deleteContact, fetchContacts } from '../redux/operations';
+import { changeFilter } from '../redux/filterSlice';
+
+export const App = () => {
   const dispatch = useDispatch();
 
-  const isNameAlreadyExists = name => {
-    const lowerCaseName = name.toLowerCase();
-    return contacts.some(
-      contact => contact.name.toLowerCase() === lowerCaseName
-    );
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
+  const onSubmitContact = evt => {
+    evt.preventDefault();
+    submit(evt, dispatch);
   };
 
-  const addNewContact = newContact => {
-    dispatch(addContact(newContact));
+  const onChangeInput = evt => {
+    dispatch(changeFilter(evt.target.value));
   };
-
-  const removeContact = id => {
-    dispatch(deleteContact(id));
-  };
-
-  const handleFilterChange = event => {
-    dispatch(setFilter(event.target.value));
-  };
-
-  const getFilteredContacts = () => {
-    const normalizedFilter = filter.toLowerCase();
+  const contacts = useSelector(state => state.contacts.items);
+  const filter = useSelector(state => state.filter);
+  const filterByName = () => {
     return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(normalizedFilter)
+      contact.name.toUpperCase().includes(filter.toUpperCase())
     );
   };
-
-  const filteredContacts = getFilteredContacts();
-
-  useEffect(() => {}, []);
-
+  const deletingContact = evt => {
+    dispatch(deleteContact(evt.target.id));
+  };
   return (
-    <div className="App">
-      <span>
-        <HeaderTitle>Телефонна книга</HeaderTitle>
-      </span>
-      <PersistGate loading={null} persistor={persistor}>
-        <ContactForm
-          onSubmit={addNewContact}
-          isNameAlreadyExists={isNameAlreadyExists}
-        />
-        <span>
-          <ContactsTitle>Контакти</ContactsTitle>
-        </span>
-        <Filter value={filter} onChange={handleFilterChange} />
-        <ContactList
-          contacts={filteredContacts}
-          onDeleteContact={removeContact}
-        />
-      </PersistGate>
-    </div>
+    <StyledDiv>
+      <HeaderTitle>Phonebook</HeaderTitle>
+      <ContactForm formSubmit={onSubmitContact} />
+      <ContactsTitle>Contacts</ContactsTitle>
+      <Filter input={onChangeInput} />
+      <ContactList
+        contacts={contacts}
+        filter={filter}
+        filtering={filterByName}
+        deleting={deletingContact}
+      />
+    </StyledDiv>
   );
-}
+};

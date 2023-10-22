@@ -1,29 +1,40 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Button, ListItem, List } from './ContactList.style';
+import PropTypes from "prop-types";
+import { ListByContact, ListItem, Button } from "./ContactList.style"; // Import styled components from your style file
 
-const ContactList = ({ contacts, onDeleteContact }) => (
-    <List>
-        {contacts.map(({ id, name, number }) => (
-            <ListItem key={id}>
-                {name}: {number}
-                <Button type="button" onClick={() => onDeleteContact(id)}>
-                    Delete
-                </Button>
-            </ListItem>
-        ))}
-    </List>
-);
-
-ContactList.propTypes = {
-    contacts: PropTypes.arrayOf(
-        PropTypes.shape({
-            id: PropTypes.string.isRequired,
-            name: PropTypes.string.isRequired,
-            number: PropTypes.string.isRequired,
-        })
-    ).isRequired,
-    onDeleteContact: PropTypes.func.isRequired,
+export const ContactList = ({ contacts, filter, filtering, deleting }) => {
+    const filteringByName = filtering();
+    return (
+        <ListByContact>
+            {contacts.length > 0 ? (
+                filter.length > 0 ? (
+                    filteringByName.map((contact) => (
+                        <ListItem key={contact.id}>
+                            {contact.name}: {contact.number}
+                            <Button type="button" id={contact.id} onClick={deleting}>
+                                Delete
+                            </Button>
+                        </ListItem>
+                    ))
+                ) : (
+                    contacts.map((contact) => (
+                        <ListItem key={contact.id}>
+                            {contact.name}: {contact.number}
+                            <Button type="button" id={contact.id} onClick={deleting}>
+                                Delete
+                            </Button>
+                        </ListItem>
+                    ))
+                )
+            ) : (
+                <li>You don't have any contacts yet</li>
+            )}
+        </ListByContact>
+    );
 };
 
-export default ContactList;
+ContactList.propTypes = {
+    contacts: PropTypes.array,
+    filter: PropTypes.string,
+    filtering: PropTypes.func,
+    deleting: PropTypes.func,
+};

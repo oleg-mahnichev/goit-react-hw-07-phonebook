@@ -1,13 +1,21 @@
-import React from 'react';
-import { Label, Input, CenteredContainer } from './Filter.style'
+import PropTypes from "prop-types";
+import { CenteredContainer, Label, Input } from "./Filter.style"; // Import styled components from your style file
 
-const Filter = ({ value, onChange }) => (
-    <CenteredContainer>
-        <Label>
-            Filter by name:
-            <Input type="text" value={value} onChange={onChange} />
-        </Label>
-    </CenteredContainer>
-);
+export const Filter = ({ input }) => {
+    return (
+        <CenteredContainer>
+            <Label htmlFor="name">Find contacts by name</Label>
+            <Input
+                type="text"
+                id="name"
+                name="name"
+                onChange={input}
+                placeholder="Name"
+            />
+        </CenteredContainer>
+    );
+};
 
-export default Filter;
+Filter.propTypes = {
+    input: PropTypes.func,
+};

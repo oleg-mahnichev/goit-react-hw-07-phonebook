@@ -1,86 +1,87 @@
-import React, { Component } from 'react';
-import { nanoid } from 'nanoid';
+import PropTypes from "prop-types";
 import { Form, Label, Input, Button } from './ContactForm.style';
-import * as Yup from 'yup';
+import { addContact, fetchContacts } from "../../redux/operations";
 
-const ValidationSchema = Yup.object().shape({
-    name: Yup.string()
-        .matches(
-            /^[A-Za-zА-Яа-яЁё]+\s[A-Za-zА-Яа-яЁё]+$/,
-            'Name must be in the format "Name Surname"'
-        )
-        .required('Name is required'),
-    number: Yup.string()
-        .matches(/^\d{3}-\d{2}-\d{2}$/, 'Phone number must be in the format "xxx-xx-xx"')
-        .required('Phone number is required'),
-});
-
-class ContactForm extends Component {
-    state = {
-        name: '',
-        number: '',
-    };
-
-    handleChange = event => {
-        const { name, value } = event.target;
-        this.setState({ [name]: value });
-    };
-
-    handleSubmit = event => {
-        event.preventDefault();
-        const { name, number } = this.state;
-
-        // Валідація
-        ValidationSchema.validate({ name, number })
-            .then(() => {
-                if (this.props.isNameAlreadyExists(name)) {
-                    alert(`${name} is already in Contacts`);
-                    return;
-                }
-
-                const newContact = {
-                    id: nanoid(),
-                    name,
-                    number,
-                };
-
-                this.props.onSubmit(newContact);
-                this.setState({ name: '', number: '' });
-            })
-            .catch(error => {
-                alert(error.message);
-            });
-    };
-
-    render() {
-        return (
-            <Form onSubmit={this.handleSubmit}>
-                <Label>
-                    Name:
-                    <Input
-                        type="text"
-                        name="name"
-                        value={this.state.name}
-                        onChange={this.handleChange}
-                        placeholder='Name Surname'
-                        required
-                    />
-                </Label>
-                <Label>
-                    Phone Number:
-                    <Input
-                        type="tel"
-                        name="number"
-                        value={this.state.number}
-                        onChange={this.handleChange}
-                        placeholder='xxx-xx-xx'
-                        required
-                    />
-                </Label>
-                <Button type="submit">Add Contact</Button>
-            </Form>
-        );
+export const submit = async (evt, dispatch) => {
+    const formReset = () => {
+        evt.target.name.value = ""
+        evt.target.querySelector('input[type="tel"]').value = ""
     }
+    await dispatch(addContact({ name: evt.target.name.value, number: evt.target.querySelector('input[type="tel"]').value }))
+    await dispatch(fetchContacts())
+    await formReset()
 }
 
-export default ContactForm;
+export const ContactForm = ({ formSubmit }) => {
+    const handleNameChange = (e) => {
+        // Allow letters, spaces, apostrophes, and dashes
+        const input = e.target.value.replace(/[^a-zA-Zа-яА-Я\s'-]/g, "");
+
+        // Remove consecutive spaces, apostrophes, and dashes
+        const formattedInput = input.replace(/['\s-]+/g, ' ');
+
+        e.target.value = formattedInput.trim(); // Remove leading and trailing spaces
+    };
+
+    const handlePhoneNumberChange = (e) => {
+        const input = e.target.value.replace(/[^0-9]/g, ''); // Залишити лише цифри
+        let formattedInput = '';
+
+        if (input.length >= 3) {
+            formattedInput += input.substr(0, 3);
+            if (input.length >= 6) {
+                formattedInput += '-' + input.substr(3, 3);
+                if (input.length >= 10) {
+                    formattedInput += '-' + input.substr(6, 4);
+                } else {
+                    formattedInput += '-' + input.substr(6);
+                }
+            } else {
+                formattedInput += '-' + input.substr(3);
+            }
+        } else {
+            formattedInput = input;
+        }
+
+        e.target.value = formattedInput;
+    };
+
+
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        formSubmit(e);
+    };
+
+    return (
+        <Form onSubmit={handleSubmit}>
+            <Label>
+                Name
+                <Input
+                    type="text"
+                    name="name"
+                    pattern="^[a-zA-Zа-яА-Я]+([' \-][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*$"
+                    title="Name may contain only letters, apostrophe, dash, and spaces. For example: Mike , Le Clerc "
+                    placeholder="Name Surname"
+                    required
+                    onInput={handleNameChange}
+                />
+                Phone
+                <Input
+                    type="tel"
+                    name="number"
+                    pattern="\+?\d{1,4}?[ .\-\s]?\(?\d{1,3}?\)?[ .\-\s]?\d{1,4}[ .\-\s]?\d{1,4}[ .\-\s]?\d{1,9}"
+                    title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
+                    placeholder="ххх-xxx-xxxx"
+                    required
+                    onInput={handlePhoneNumberChange}
+                />
+                <Button type="submit">Add contact</Button>
+            </Label>
+        </Form>
+    );
+};
+
+ContactForm.propTypes = {
+    formSubmit: PropTypes.func
+};
