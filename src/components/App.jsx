@@ -15,9 +15,19 @@ export const App = () => {
   useEffect(() => {
     dispatch(fetchContacts());
   }, [dispatch]);
+
   const onSubmitContact = evt => {
     evt.preventDefault();
-    submit(evt, dispatch);
+    const name = evt.target.name.value.toLowerCase(); // Перетворити введене ім'я до нижнього регістру
+    const contactExists = contacts.some(
+      contact => contact.name.toLowerCase() === name
+    ); // Перетворити імена контактів до нижнього регістру для порівняння
+
+    if (contactExists) {
+      alert('This contact is already in your contact list!!!');
+    } else {
+      submit(evt, dispatch);
+    }
   };
 
   const onChangeInput = evt => {

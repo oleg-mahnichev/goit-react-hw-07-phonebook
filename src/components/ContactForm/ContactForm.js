@@ -2,17 +2,25 @@ import PropTypes from "prop-types";
 import { Form, Label, Input, Button } from './ContactForm.style';
 import { addContact, fetchContacts } from "../../redux/operations";
 
+
 export const submit = async (evt, dispatch) => {
     const formReset = () => {
         evt.target.name.value = ""
         evt.target.querySelector('input[type="tel"]').value = ""
     }
+
+
     await dispatch(addContact({ name: evt.target.name.value, number: evt.target.querySelector('input[type="tel"]').value }))
+
     await dispatch(fetchContacts())
+
     await formReset()
 }
 
+
+
 export const ContactForm = ({ formSubmit }) => {
+
     const handleNameChange = (e) => {
         // Allow letters, spaces, apostrophes, and dashes
         const input = e.target.value.replace(/[^a-zA-Zа-яА-Я\s'-]/g, "");
@@ -47,7 +55,6 @@ export const ContactForm = ({ formSubmit }) => {
     };
 
 
-
     const handleSubmit = (e) => {
         e.preventDefault();
         formSubmit(e);
@@ -60,7 +67,7 @@ export const ContactForm = ({ formSubmit }) => {
                 <Input
                     type="text"
                     name="name"
-                    pattern="^[a-zA-Zа-яА-Я]+([' \-][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*$"
+                    // pattern="^[a-zA-Zа-яА-Я]+([' \-][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*$"
                     title="Name may contain only letters, apostrophe, dash, and spaces. For example: Mike , Le Clerc "
                     placeholder="Name Surname"
                     required
@@ -70,7 +77,7 @@ export const ContactForm = ({ formSubmit }) => {
                 <Input
                     type="tel"
                     name="number"
-                    pattern="\+?\d{1,4}?[ .\-\s]?\(?\d{1,3}?\)?[ .\-\s]?\d{1,4}[ .\-\s]?\d{1,4}[ .\-\s]?\d{1,9}"
+                    // pattern="\+?\d{1,4}?[ .\-\s]?\(?\d{1,3}?\)?[ .\-\s]?\d{1,4}[ .\-\s]?\d{1,4}[ .\-\s]?\d{1,9}"
                     title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
                     placeholder="ххх-xxx-xxxx"
                     required
